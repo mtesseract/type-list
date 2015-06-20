@@ -1,5 +1,6 @@
 {-# LANGUAGE
       DataKinds
+    , FlexibleContexts
     , GADTs
     , PolyKinds
     , ScopedTypeVariables
@@ -45,6 +46,9 @@ type instance Apply (Map' f) l = Map f l
 type family Length xs where
     Length '[] = 0
     Length (x ': xs) = 1 + (Length xs)
+
+lengthVal :: forall sing xs. KnownNat (Length xs) => sing xs -> Integer
+lengthVal _ = natVal (undefined :: proxy (Length xs))
 
 data Length' :: TyFun [a] Nat -> * where
     Length' :: Length' l
