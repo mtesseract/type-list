@@ -26,7 +26,6 @@ module Data.Type.List where
 
 import GHC.TypeLits
 import Data.Type.Bool
-import Data.Type.Equality
 import Data.Singletons
 
 -- |Maps a curried type function over a type list.
@@ -43,11 +42,31 @@ data Map' :: (TyFun a b -> *) -> TyFun [a] [b] -> * where
 type instance Apply Map'' f = Map' f
 type instance Apply (Map' f) l = Map f l
 
+-- |Zip two list with a curried two-argument type function.
+type family ZipWith (f :: TyFun a (TyFun b c -> *) -> *) (xs :: [a]) (ys :: [b]) where
+    ZipWith f '[] '[] = '[]
+    ZipWith f (x ': xs) (y ': ys) = (Apply (Apply f x) y) ': ZipWith f xs ys
+
+data ZipWith''' :: TyFun (TyFun a (TyFun b c -> *) -> *) (TyFun [a] (TyFun [b] [c] -> *) -> *) -> * where
+  ZipWith''' :: ZipWith''' f
+
+data ZipWith'' :: (TyFun a (TyFun b c -> *) -> *) -> TyFun [a] (TyFun [b] [c] -> *) -> * where
+  ZipWith'' :: ZipWith'' f xs
+
+data ZipWith' :: (TyFun a (TyFun b c -> *) -> *) -> [a] -> TyFun [b] [c] -> * where
+  ZipWith' :: ZipWith' f xs ys
+
+type instance Apply ZipWith''' f = ZipWith'' f
+type instance Apply (ZipWith'' f) xs = ZipWith' f xs
+type instance Apply (ZipWith' f xs) ys = ZipWith f xs ys
+
+-- | Length of a type-level list, as a type-level natural number.
 type family Length xs where
     Length '[] = 0
     Length (x ': xs) = 1 + (Length xs)
 
 lengthVal :: forall sing xs. KnownNat (Length xs) => sing xs -> Integer
+-- ^Length of a type-level list, as an integer.
 lengthVal _ = natVal (undefined :: proxy (Length xs))
 
 data Length' :: TyFun [a] Nat -> * where
@@ -99,6 +118,7 @@ data Remove' :: k -> TyFun [k] [k] -> * where
 type instance Apply Remove'' x = Remove' x
 type instance Apply (Remove' x) xs = Remove x xs
 
+-- |Set difference over type lists.
 type family Difference xs ys where
     Difference '[] ys = ys
     Difference (x ': xs) ys = Remove x (Difference xs ys)
@@ -112,10 +132,12 @@ data Difference' :: [k] -> TyFun [k] [k] -> * where
 type instance Apply Difference'' xs = Difference' xs
 type instance Apply (Difference' xs) ys = Difference xs ys
 
+-- |Helper type family for 'Reverse'.
 type family ReverseAcc xs acc where
     ReverseAcc '[] acc = acc
     ReverseAcc (x ': xs) acc = ReverseAcc xs (x ': acc)
 
+-- |Reverse a type-level list.
 type family Reverse xs where
     Reverse xs = ReverseAcc xs '[]
 
@@ -126,8 +148,8 @@ type instance Apply Reverse' xs = Reverse xs
 
 -- | Type list membership test.
 type family Find x ys where
-    Find x '[]       = False
-    Find x (x ': ys) = True
+    Find x '[]       = 'False
+    Find x (x ': ys) = 'True
     Find x (y ': ys) = Find x ys
 
 data Find'' :: TyFun k (TyFun [k] Bool -> *) -> * where
@@ -156,7 +178,7 @@ type instance Apply (Intersection' xs) ys = Intersection xs ys
 
 -- |Test if two list do not contain any equal elements.
 type family Distinct xs ys where
-    Distinct '[] '[] = False
+    Distinct '[] '[] = 'False
     Distinct (x ': xs) (x ': ys) = Distinct xs ys
     Distinct (x ': xs) (y ': ys) = Not (Find x (y ': ys)) && Distinct xs ys
 
@@ -234,5 +256,4 @@ data Swap' :: TyFun (a,b) (b,a) -> * where
     Swap' :: Swap' f
 
 type instance Apply Swap' '(a,b) = Swap '(a,b)
-
 
