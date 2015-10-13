@@ -1,5 +1,5 @@
 name:                type-list
-version:             0.3.0.0
+version:             0.3.0.1
 synopsis:            Operations on type-level lists and tuples.
 description:         Operations on type-level lists and tuples, together with their curried versions.
 license:             BSD3
