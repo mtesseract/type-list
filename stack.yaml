@@ -1,7 +1,20 @@
 flags: {}
 packages:
 - '.'
-extra-deps: []
-resolver: lts-3.15
+extra-deps:
+- singletons-2.1
+- mtl-2.2.1
+- syb-0.6
+- th-desugar-1.6
+- th-lift-0.7.6
+- th-orphans-0.13.1
+- th-lift-instances-0.1.7
+- th-reify-many-0.1.6
+- safe-0.3.9
+- text-1.2.2.1
+- th-expand-syns-0.4.0.0
+- vector-0.11.0.0
+- primitive-0.6.1.0
+resolver: ghc-8.0.1
 compiler: ghc-8.0.1
 allow-newer: true
