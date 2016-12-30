@@ -164,8 +164,9 @@ type instance Apply (Find' x) xs = Find x xs
 -- | Type list intersection. 
 type family Intersection xs ys where
     Intersection '[] ys = '[]
-    Intersection (x ': xs) (x ': ys) = x ': (Intersection xs ys)
-    Intersection (x ': xs) (y ': ys) = If (Find x ys) (x ': (Intersection xs (y ': ys))) (Intersection xs (y ': ys))
+    Intersection (x ': xs) ys = If (Find x ys)
+                                   (x ': Intersection xs ys)
+                                   (Intersection xs ys)
 
 data Intersection'' :: TyFun [k] (TyFun [k] [k] -> *) -> * where
     Intersection'' :: Intersection'' f
